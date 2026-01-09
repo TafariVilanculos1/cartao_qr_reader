@@ -38,7 +38,7 @@ class _TelaInscritoState extends State<TelaNaoInscrito> {
             Image.asset('assets/no.png', height: 150),
             const SizedBox(height: 20),
             const Text(
-              "ESTUDANTE ACTIVO",
+              "ESTUDANTE INACTIVO",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,

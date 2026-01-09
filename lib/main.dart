@@ -4,6 +4,7 @@ import 'package:cartao_qr_reader/View/LeituraQR.dart';
 import 'package:cartao_qr_reader/View/TelaInscrito.dart';
 import 'package:cartao_qr_reader/View/TelaNaoInscrito.dart';
 import 'package:cartao_qr_reader/Control/QrController.dart';
+import 'package:flutter/services.dart';
 
 
 void main()
@@ -69,7 +70,7 @@ class TelaMenu extends State<TelaPrincipal>
                children: [
                  ElevatedButton(
                      onPressed: () async {
-                       Estudante est = Estudante(codigo: 202202442, nome: "Tafari", curso: "Desenvolvimento de Software", faculdade: "FCTI", contacto: "841478096");
+                       Estudante est = Estudante(codigo: "202202442", nome: "Tafari", curso: "Desenvolvimento de Software", faculdade: "FCTI", contacto: "841478096");
                        bool semestre = true;
                        bool continuar = true;
                        //final controller = QrController();
@@ -174,56 +175,74 @@ class TelaMenu extends State<TelaPrincipal>
      );
    }
 
-   void mostrarDialog(BuildContext context) {
-     TextEditingController textcontroller = TextEditingController();
-     QrController controller = QrController();
+   void mostrarDialog(BuildContext contextTela) {
+     final textController = TextEditingController();
+     final controller = QrController();
 
      showDialog(
-       context: context,
-       builder: (context) {
+       context: contextTela,
+       builder: (dialogContext) {
          return AlertDialog(
            title: const Text("CÓDIGO DE ESTUDANTE"),
            content: TextField(
-             controller: textcontroller,
-             keyboardType: TextInputType.number,
-             decoration: const InputDecoration(hintText: "DIGITE O CÓDIGO"),
+             controller: textController,
+             textCapitalization: TextCapitalization.characters,
+             decoration: const InputDecoration(
+               hintText: "Ex: EST001",
+             ),
            ),
            actions: [
              TextButton(
-               onPressed: () => Navigator.pop(context),
+               onPressed: () => Navigator.pop(dialogContext),
                child: const Text("Cancelar"),
              ),
              TextButton(
                onPressed: () async {
-                 bool semestre = true;
-                 Estudante est = Estudante(codigo: 202202442, nome: "Tafari", curso: "Desenvolvimento de Software", faculdade: "FCTI", contacto: "841478096");
+                 final codigo =
+                 textController.text.trim().toUpperCase();
 
-                 final codigo = int.tryParse(textcontroller.text);
+                 final regex = RegExp(r'^[A-Z]{3}\d{3}$');
 
-                 if (codigo == null) return;
-
-                 Navigator.pop(context);
-
-                 if(codigo==est.codigo && semestre==true)
-                 {
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => TelaInscrito(estudante: est)));
-
-                 }else if(codigo==est.codigo && semestre==false){
-                   Navigator.push(context, MaterialPageRoute(builder: (context) => TelaNaoInscrito(estudante: est)));
-                 }
-                 // fecha dialog
-                 /*
-                 final est = await controller.buscarEstudantePorCodigo(codigo);
-
-                 if (!context.mounted) return;
-
-                 if (est != null) {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => TelaInscrito(estudante: est)));
-                 } else {
-                   Navigator.push(context, MaterialPageRoute(builder: (context)=> TelaNaoInscrito(estudante: est!)));
+                 if (!regex.hasMatch(codigo)) {
+                   ScaffoldMessenger.of(contextTela).showSnackBar(
+                     const SnackBar(
+                       content:
+                       Text("Código inválido. Exemplo: EST001"),
+                     ),
+                   );
+                   return;
                  }
 
-                  */
+                 Navigator.pop(dialogContext);
+
+                 final inscrito =
+                 await controller.confirmarInscricao(codigo);
+
+                 if (!contextTela.mounted || inscrito == null) {
+                   ScaffoldMessenger.of(contextTela).showSnackBar(
+                     const SnackBar(
+                       content: Text("Erro ao verificar inscrição"),
+                     ),
+                   );
+                   return;
+                 }
+
+                 final est = Estudante(
+                   codigo: codigo,
+                   nome: "Estudante",
+                   curso: "Curso",
+                   faculdade: "Faculdade",
+                   contacto: "",
+                 );
+
+                 Navigator.push(
+                   contextTela,
+                   MaterialPageRoute(
+                     builder: (_) => inscrito
+                         ? TelaInscrito(estudante: est)
+                         : TelaNaoInscrito(estudante: est),
+                   ),
+                 );
                },
                child: const Text("Verificar"),
              ),
@@ -232,5 +251,9 @@ class TelaMenu extends State<TelaPrincipal>
        },
      );
    }
+
+
+
+
 
  }

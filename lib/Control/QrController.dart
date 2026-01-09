@@ -1,28 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:cartao_qr_reader/model/estudante.dart';
-
 
 class QrController {
+  final String baseUrl = 'http://192.168.0.116:8080/v1/estudantes';
 
-  final String baseUrl = "http://192.168.0.116:8080/v1/estudantes";
-
-  Future<Estudante?> buscarEstudantePorCodigo(int codigo) async {
+  Future<bool?> confirmarInscricao(String codigoEstudante) async {
     try {
+      final url =
+          '$baseUrl/EST001/inscricoes/confirmacao';
+
       final response = await http.get(
-        Uri.parse('$baseUrl/$codigo'),
+        Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
-        final jsonBody = jsonDecode(response.body);
-        return Estudante.fromJson(jsonBody);
+        return jsonDecode(response.body) as bool;
       } else {
-        return null; // estudante não encontrado
+        return null; // erro da API
       }
     } catch (e) {
-      debugPrint("Erro ao chamar API: $e");
+      debugPrint('Erro API: $e');
       return null;
     }
   }
