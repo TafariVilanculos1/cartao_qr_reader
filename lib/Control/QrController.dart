@@ -1,14 +1,45 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+
+import '../model/estudante.dart';
 
 class QrController {
   final String baseUrl = 'http://192.168.0.116:8080/v1/estudantes';
 
+  Future<Estudante?> buscarEstudante(String codigo) async {
+    try {
+      final url = '$baseUrl/$codigo';
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> json =
+        jsonDecode(response.body);
+
+        return Estudante.fromJson(json);
+      }
+
+      if (response.statusCode == 404) {
+        return null; // estudante não existe
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Erro ao buscar estudante: $e');
+      return null;
+    }
+  }
+
+
   Future<bool?> confirmarInscricao(String codigoEstudante) async {
     try {
       final url =
-          '$baseUrl/EST001/inscricoes/confirmacao';
+          '$baseUrl/$codigoEstudante/inscricoes/confirmacao';
 
       final response = await http.get(
         Uri.parse(url),
@@ -17,12 +48,13 @@ class QrController {
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as bool;
-      } else {
-        return null; // erro da API
       }
+
+      return null;
     } catch (e) {
-      debugPrint('Erro API: $e');
+      debugPrint('Erro API inscrição: $e');
       return null;
     }
   }
 }
+

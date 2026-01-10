@@ -70,10 +70,8 @@ class TelaMenu extends State<TelaPrincipal>
                children: [
                  ElevatedButton(
                      onPressed: () async {
-                       Estudante est = Estudante(codigo: "202202442", nome: "Tafari", curso: "Desenvolvimento de Software", faculdade: "FCTI", contacto: "841478096");
-                       bool semestre = true;
-                       bool continuar = true;
-                       //final controller = QrController();
+                     final controller = QrController();
+                     bool continuar = true;
 
                      while (continuar) {
                        final codigoLido = await Navigator.push(
@@ -81,47 +79,63 @@ class TelaMenu extends State<TelaPrincipal>
                        MaterialPageRoute(builder: (_) => const LeituraQr()),
                        );
 
+                       if (!context.mounted || codigoLido == null) return;
+
+                       final codigo =
+                       codigoLido.toString().trim().toUpperCase();
+
+                       // ✅ valida formato EST001
+                       final regex = RegExp(r'^[A-Z]{3}\d{3}$');
+
+                     if (!regex.hasMatch(codigo)) {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                           const SnackBar(
+                           content: Text("QR inválido. Ex: EST001"),
+                               ),
+                           );
+                         continue;
+                     }
+
+                       // 1️⃣ Buscar estudante
+                       final estudante = await controller.buscarEstudante(codigo);
+
                        if (!context.mounted) return;
 
-                       if(codigoLido=="202202442"&& semestre==true)
-                       {
-                         final voltar = await Navigator.push(
-                           context,
-                           MaterialPageRoute(
-                             builder: (_) => TelaInscrito(estudante: est),
-                           ),
+                       if (estudante == null) {
+                         await showDialog(
+                             context: context,
+                             builder: (_) => const AlertDialog(
+                             title: Text("Erro"),
+                             content: Text("Estudante não existe"),
+                             ),
                          );
-                         continuar = voltar == true;
-
-                       }else if(codigoLido=="202202442" && semestre==false){
-
-                         final voltar = await Navigator.push(
-                           context,
-                           MaterialPageRoute(
-                             builder: (_) => TelaNaoInscrito(estudante: est),
-                           ),
-                         );
-                          continuar = voltar == true;
+                         continue;
                        }
 
-                          /*
-                           if (estudante != null) {
-                           final voltar = await Navigator.push(
-                           context,
-                           MaterialPageRoute(
-                           builder: (_) => TelaInscrito(estudante: estudante),
-                           ),
-                           );
-                           continuar = voltar == true;
-                           } else {
-                           final voltar = await Navigator.push(
-                           context,
-                           MaterialPageRoute(builder: (_) => TelaNaoInscrito(estudante: estudante!,)),
-                           );
-                           continuar = voltar == true;
-                           }
+                       // 2️⃣ Confirmar inscrição
+                       final inscrito =
+                       await controller.confirmarInscricao(codigo);
 
-                           */
+                       if (inscrito == null) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                               const SnackBar(
+                               content: Text("Erro ao confirmar inscrição"),
+                               ),
+                           );
+                           continue;
+                       }
+
+                       // 3️⃣ Navegação
+                       final voltar = await Navigator.push(
+                       context,
+                       MaterialPageRoute(
+                         builder: (_) => inscrito
+                         ? TelaInscrito(estudante: estudante)
+                             : TelaNaoInscrito(estudante: estudante),
+                         ),
+                       );
+
+                       continuar = voltar == true;
                          }
                        },
 
@@ -206,8 +220,7 @@ class TelaMenu extends State<TelaPrincipal>
                  if (!regex.hasMatch(codigo)) {
                    ScaffoldMessenger.of(contextTela).showSnackBar(
                      const SnackBar(
-                       content:
-                       Text("Código inválido. Exemplo: EST001"),
+                       content: Text("Código inválido. Ex: EST001"),
                      ),
                    );
                    return;
@@ -215,32 +228,43 @@ class TelaMenu extends State<TelaPrincipal>
 
                  Navigator.pop(dialogContext);
 
-                 final inscrito =
-                 await controller.confirmarInscricao(codigo);
+                 // 1️⃣ Buscar estudante
+                 final estudante =
+                 await controller.buscarEstudante(codigo);
 
-                 if (!contextTela.mounted || inscrito == null) {
-                   ScaffoldMessenger.of(contextTela).showSnackBar(
-                     const SnackBar(
-                       content: Text("Erro ao verificar inscrição"),
+                 if (!contextTela.mounted) return;
+
+                 if (estudante == null) {
+                   showDialog(
+                     context: contextTela,
+                     builder: (_) => const AlertDialog(
+                       title: Text("Erro"),
+                       content: Text("Estudante não existe"),
                      ),
                    );
                    return;
                  }
 
-                 final est = Estudante(
-                   codigo: codigo,
-                   nome: "Estudante",
-                   curso: "Curso",
-                   faculdade: "Faculdade",
-                   contacto: "",
-                 );
+                 // 2️⃣ Confirmar inscrição
+                 final inscrito =
+                 await controller.confirmarInscricao(codigo);
 
+                 if (inscrito == null) {
+                   ScaffoldMessenger.of(contextTela).showSnackBar(
+                     const SnackBar(
+                       content: Text("Erro ao confirmar inscrição"),
+                     ),
+                   );
+                   return;
+                 }
+
+                 // 3️⃣ Navegação final
                  Navigator.push(
                    contextTela,
                    MaterialPageRoute(
                      builder: (_) => inscrito
-                         ? TelaInscrito(estudante: est)
-                         : TelaNaoInscrito(estudante: est),
+                         ? TelaInscrito(estudante: estudante)
+                         : TelaNaoInscrito(estudante: estudante),
                    ),
                  );
                },
@@ -251,6 +275,7 @@ class TelaMenu extends State<TelaPrincipal>
        },
      );
    }
+
 
 
 

@@ -13,4 +13,25 @@ class Estudante {
     required this.contacto,
   });
 
+  /// Construtor a partir do JSON da API
+  factory Estudante.fromJson(Map<String, dynamic> json) {
+    return Estudante(
+      codigo: json['codigo'] as String,
+      nome: json['nome'] as String,
+      curso: json['curso'] as String,
+      faculdade: json['faculdade'] as String,
+      contacto: json['contacto']?.toString() ?? '',
+    );
+  }
+
+  /// (Opcional) Para enviar para API futuramente
+  Map<String, dynamic> toJson() {
+    return {
+      'codigo': codigo,
+      'nome': nome,
+      'curso': curso,
+      'faculdade': faculdade,
+      'contacto': contacto,
+    };
+  }
 }
