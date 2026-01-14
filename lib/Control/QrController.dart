@@ -6,34 +6,35 @@ import 'package:http/http.dart' as http;
 import '../model/estudante.dart';
 
 class QrController {
-  final String baseUrl = 'http://192.168.0.116:8080/v1/estudantes';
+  final String baseUrl = 'http://192.168.137.221:8080/v1/estudantes';
 
   Future<Estudante?> buscarEstudante(String codigo) async {
     try {
       final url = '$baseUrl/$codigo';
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-      );
+      final response = await http.get(Uri.parse(url));
+
+      debugPrint('STATUS: ${response.statusCode}');
+      debugPrint('BODY: ${response.body}');
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> json =
-        jsonDecode(response.body);
+        jsonDecode(utf8.decode(response.bodyBytes));
 
         return Estudante.fromJson(json);
       }
 
       if (response.statusCode == 404) {
-        return null; // estudante não existe
+        return null;
       }
 
       return null;
     } catch (e) {
-      debugPrint('Erro ao buscar estudante: $e');
+      debugPrint('❌ Erro ao buscar estudante: $e');
       return null;
     }
   }
+
 
 
   Future<bool?> confirmarInscricao(String codigoEstudante) async {

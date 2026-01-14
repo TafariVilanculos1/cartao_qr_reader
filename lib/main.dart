@@ -244,7 +244,6 @@ class TelaMenu extends State<TelaPrincipal>
                    );
                    return;
                  }
-
                  // 2️⃣ Confirmar inscrição
                  final inscrito =
                  await controller.confirmarInscricao(codigo);

@@ -60,7 +60,7 @@ class _TelaInscritoState extends State<TelaInscrito> {
                     children: [
                       _info('CÓDIGO', e.codigo.toString()),
                       _info('NOME', e.nome),
-                      _info('CURSO', e.curso),
+                      _info('GÊNERO', e.genero),
                       _info('FACULDADE', e.faculdade),
                       _info('CONTACTO', e.contacto),
                     ],
