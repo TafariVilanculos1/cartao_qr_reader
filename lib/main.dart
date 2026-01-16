@@ -50,13 +50,14 @@ class TelaMenu extends State<TelaPrincipal>
        body: Column(
          crossAxisAlignment: CrossAxisAlignment.center, // centraliza horizontalmente
          children: [
+
            const Padding(
              padding: EdgeInsets.only(top: 30, bottom: 20),
              child: Center( // garante que o texto fique no centro
                child: Text(
-                 "VERIFICAR INSCRIÇÃO",
+                 "SCE - SISTEMA DE CONTROLO DE ESTUDANTE",textAlign: TextAlign.center,
                  style: TextStyle(
-                   fontSize: 18,
+                   fontSize: 14,
                    fontWeight: FontWeight.bold,
                  ),
                ),
@@ -84,17 +85,6 @@ class TelaMenu extends State<TelaPrincipal>
                        final codigo =
                        codigoLido.toString().trim().toUpperCase();
 
-                       // ✅ valida formato EST001
-                       final regex = RegExp(r'^[A-Z]{3}\d{3}$');
-
-                     if (!regex.hasMatch(codigo)) {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                           const SnackBar(
-                           content: Text("QR inválido. Ex: EST001"),
-                               ),
-                           );
-                         continue;
-                     }
 
                        // 1️⃣ Buscar estudante
                        final estudante = await controller.buscarEstudante(codigo);
@@ -143,7 +133,7 @@ class TelaMenu extends State<TelaPrincipal>
                    style: ElevatedButton.styleFrom(
                      backgroundColor: Colors.red,
                      foregroundColor: Colors.white,
-                     minimumSize: const Size(260, 56),
+                     minimumSize: const Size(260, 150),
                      shape: RoundedRectangleBorder(
                        borderRadius: BorderRadius.circular(14),
                      ),
@@ -167,7 +157,7 @@ class TelaMenu extends State<TelaPrincipal>
                    style: ElevatedButton.styleFrom(
                      backgroundColor: Colors.red.shade700,
                      foregroundColor: Colors.white,
-                     minimumSize: const Size(260, 56),
+                     minimumSize: const Size(260, 150),
                      shape: RoundedRectangleBorder(
                        borderRadius: BorderRadius.circular(14),
                      ),
@@ -215,16 +205,6 @@ class TelaMenu extends State<TelaPrincipal>
                  final codigo =
                  textController.text.trim().toUpperCase();
 
-                 final regex = RegExp(r'^[A-Z]{3}\d{3}$');
-
-                 if (!regex.hasMatch(codigo)) {
-                   ScaffoldMessenger.of(contextTela).showSnackBar(
-                     const SnackBar(
-                       content: Text("Código inválido. Ex: EST001"),
-                     ),
-                   );
-                   return;
-                 }
 
                  Navigator.pop(dialogContext);
 
@@ -274,10 +254,4 @@ class TelaMenu extends State<TelaPrincipal>
        },
      );
    }
-
-
-
-
-
-
  }
