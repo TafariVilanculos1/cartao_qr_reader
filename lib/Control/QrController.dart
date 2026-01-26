@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-
 import '../model/estudante.dart';
 
 class QrController {
-  final String baseUrl = 'http://144.91.69.212:8080/v1/estudantes';
+  final String baseUrl = 'https://becard.ustm.ac.mz:8443/v1/estudantes';
 
   Future<Estudante?> buscarEstudante(String codigo) async {
     try {

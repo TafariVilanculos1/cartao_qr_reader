@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cartao_qr_reader/model/estudante.dart';
 import 'package:flutter/material.dart';
 import 'package:cartao_qr_reader/View/LeituraQR.dart';
@@ -5,10 +7,12 @@ import 'package:cartao_qr_reader/View/TelaInscrito.dart';
 import 'package:cartao_qr_reader/View/TelaNaoInscrito.dart';
 import 'package:cartao_qr_reader/Control/QrController.dart';
 import 'package:flutter/services.dart';
+import 'package:cartao_qr_reader/Control/MyHttpOverrides.dart';
 
 
 void main()
 {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(TelaPrincipal());
 }
 
