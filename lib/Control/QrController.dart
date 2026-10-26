@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../model/estudante.dart';
 
 class QrController {
-  final String baseUrl = 'https://becard.ustm.ac.mz:8443/v1/estudantes';
+  final String baseUrl = 'https://ecard.ustm.ac.mz/v1/estudantes';
 
   Future<Estudante?> buscarEstudante(String codigo) async {
     try {

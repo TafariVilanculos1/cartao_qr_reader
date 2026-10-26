@@ -16,7 +16,7 @@ class _TelaInscritoState extends State<TelaInscrito> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 60), () {
       if (mounted) Navigator.pop(context, true);
     });
   }
@@ -60,9 +60,34 @@ class _TelaInscritoState extends State<TelaInscrito> {
                     children: [
                       _info('CÓDIGO', e.codigo.toString()),
                       _info('NOME', e.nome),
-                      _info('GÊNERO', e.genero),
-                      _info('FACULDADE', e.faculdade),
-                      _info('CONTACTO', e.contacto),
+                      _info('DELEGAÇÃO', e.delegacao),
+                      _info('CAMPUS', e.campus),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const Text(
+              "Situação Financeira",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                elevation: 8,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _info('NOME', e.codigo.toString()),
+                      _info('DÍVIDA', e.nome)
                     ],
                   ),
                 ),

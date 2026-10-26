@@ -74,64 +74,10 @@ class TelaMenu extends State<TelaPrincipal>
                crossAxisAlignment: CrossAxisAlignment.center, // centraliza os botões
                children: [
                  ElevatedButton(
-                     onPressed: () async {
-                     final controller = QrController();
-                     bool continuar = true;
-
-                     while (continuar) {
-                       final codigoLido = await Navigator.push(
-                       context,
-                       MaterialPageRoute(builder: (_) => const LeituraQr()),
+                     onPressed:(){
+                       Navigator.push(context,MaterialPageRoute(builder: (_) => const LeituraQr()),
                        );
-
-                       if (!context.mounted || codigoLido == null) return;
-
-                       final codigo =
-                       codigoLido.toString().trim().toUpperCase();
-
-
-                       // 1️⃣ Buscar estudante
-                       final estudante = await controller.buscarEstudante(codigo);
-
-                       if (!context.mounted) return;
-
-                       if (estudante == null) {
-                         await showDialog(
-                             context: context,
-                             builder: (_) => const AlertDialog(
-                             title: Text("Erro"),
-                             content: Text("Estudante não existe"),
-                             ),
-                         );
-                         continue;
-                       }
-
-                       // 2️⃣ Confirmar inscrição
-                       final inscrito =
-                       await controller.confirmarInscricao(codigo);
-
-                       if (inscrito == null) {
-                               ScaffoldMessenger.of(context).showSnackBar(
-                               const SnackBar(
-                               content: Text("Erro ao confirmar inscrição"),
-                               ),
-                           );
-                           continue;
-                       }
-
-                       // 3️⃣ Navegação
-                       final voltar = await Navigator.push(
-                       context,
-                       MaterialPageRoute(
-                         builder: (_) => inscrito
-                         ? TelaInscrito(estudante: estudante)
-                             : TelaNaoInscrito(estudante: estudante),
-                         ),
-                       );
-
-                       continuar = voltar == true;
-                         }
-                       },
+                     },
 
 
                    style: ElevatedButton.styleFrom(
