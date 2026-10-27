@@ -13,7 +13,6 @@ class LeituraQr extends StatefulWidget {
 }
 
 class _LeituraQrState extends State<LeituraQr> {
-
   final MobileScannerController _controller =
   MobileScannerController(
     facing: CameraFacing.back,
@@ -29,13 +28,17 @@ class _LeituraQrState extends State<LeituraQr> {
   Color _cor = Colors.transparent;
 
   Future<void> _alternarCamera() async {
-    await _controller.switchCamera();
+    try {
+      await _controller.switchCamera();
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      _cameraFrontal = !_cameraFrontal;
-    });
+      setState(() {
+        _cameraFrontal = !_cameraFrontal;
+      });
+    } catch (e) {
+      debugPrint('Erro ao alternar câmara: $e');
+    }
   }
 
   Future<void> _processar(String codigo) async {
@@ -46,6 +49,7 @@ class _LeituraQrState extends State<LeituraQr> {
     codigo = codigo.trim().toUpperCase();
 
     try {
+      // 1. Buscar estudante
       final estudante = await api.buscarEstudante(codigo);
 
       if (!mounted) return;
@@ -55,25 +59,74 @@ class _LeituraQrState extends State<LeituraQr> {
         return;
       }
 
+      // 2. Confirmar inscrição
       final inscrito = await api.confirmarInscricao(codigo);
 
       if (!mounted) return;
 
-      if (inscrito == true) {
-        Navigator.push(context, MaterialPageRoute(builder:(_)=>TelaInscrito(estudante: estudante)));
-      } else if (inscrito == false) {
-        Navigator.push(context, MaterialPageRoute(builder:(_)=>TelaNaoInscrito(estudante: estudante)));
-      } else {
-        _mostrar("❌ ERRO NA VERIFICAÇÃO", Colors.red);
+      if (inscrito == null) {
+        _mostrar("❌ ERRO NA VERIFICAÇÃO DA INSCRIÇÃO", Colors.red);
+        return;
+      }
+
+      if (inscrito == false) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TelaNaoInscrito(
+              estudante: estudante,
+            ),
+          ),
+        );
+
+        if (mounted) {
+          _ocupado = false;
+        }
+
+        return;
+      }
+
+      // 3. Consultar situação financeira
+      final valorDivida =
+      await api.confirmarSituacaoFinanceira(codigo);
+
+      if (!mounted) return;
+
+      if (valorDivida == null) {
+        _mostrar(
+          "❌ ERRO NA VERIFICAÇÃO FINANCEIRA",
+          Colors.red,
+        );
+        return;
+      }
+
+      // 4. Apresentar os dados do estudante e a dívida
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TelaInscrito(
+            estudante: estudante,
+            valorDivida: valorDivida,
+          ),
+        ),
+      );
+
+      if (mounted) {
+        _ocupado = false;
       }
 
     } catch (e) {
+      debugPrint('Erro ao processar QR: $e');
+
       if (!mounted) return;
+
       _mostrar("❌ ERRO DE COMUNICAÇÃO", Colors.red);
     }
   }
 
   void _mostrar(String texto, Color cor) {
+    if (!mounted) return;
+
     setState(() {
       _mensagem = texto;
       _cor = cor;
@@ -105,21 +158,27 @@ class _LeituraQrState extends State<LeituraQr> {
         backgroundColor: Colors.red,
         actions: [
           IconButton(
-            tooltip: "Alternar câmara",
-            icon: const Icon(Icons.cameraswitch,color: Colors.white,),
+            tooltip: _cameraFrontal
+                ? "Usar câmara traseira"
+                : "Usar câmara frontal",
+            icon: const Icon(
+              Icons.cameraswitch,
+              color: Colors.white,
+            ),
             onPressed: _alternarCamera,
           ),
         ],
       ),
-
       body: Stack(
         children: [
           MobileScanner(
             controller: _controller,
             onDetect: (capture) {
+              if (capture.barcodes.isEmpty) return;
+
               final codigo = capture.barcodes.first.rawValue;
 
-              if (codigo != null) {
+              if (codigo != null && codigo.isNotEmpty) {
                 _processar(codigo);
               }
             },

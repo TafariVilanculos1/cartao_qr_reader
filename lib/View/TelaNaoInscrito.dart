@@ -16,7 +16,7 @@ class _TelaInscritoState extends State<TelaNaoInscrito> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 120), () {
       if (mounted) Navigator.pop(context, true);
     });
   }
